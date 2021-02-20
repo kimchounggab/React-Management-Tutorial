@@ -1,3 +1,7 @@
+body {
+  margin: 20px;
+  padding: 20px;
+}
 .gray-background {
   background-color: yellow;
 }
