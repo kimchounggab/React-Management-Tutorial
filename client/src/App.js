@@ -7,46 +7,48 @@ import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
+
+
 
 const styles = theme => ({
   root: {
     width: '100%',
-    marginTop: theme.spacing.unit * 3,
+    marginTop: theme.spacing(3),
     overflowX: "auto"
   },
   table: {
     minWidth: 1080
+  },
+  progress: {
+    margin: theme.spacing(2)
   }
-})
-
-const customer =[ {
-  'id': 1,
-  'image': 'https://placeimg.com/100/100/1',
-  'name': '홍길동',
-  'birthday': '961222',
-  'gender': '남자',
-  'job': '대학생',
-},
-{
-  'id': 2,
-  'image': 'https://placeimg.com/100/100/2',
-  'name': '손오공',
-  'birthday': '961223',
-  'gender': '남자',
-  'job': '쇼맨',
-},
-
-{
-  'id': 3,
-  'image': 'https://placeimg.com/100/100/3',
-  'name': '베트맨',
-  'birthday': '961224',
-  'gender': '남자',
-  'job': '정의맨 ',
-}
-]
+});
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { 
+    customer: "",
+    completed: 0
+   }
+  }
+  componentDidMount() {
+    this.timer = setInterval(this.progress, 20);
+    this.callApi()
+    .then(res => this.setState({customer: res}))
+    .catch(err => console.log(err));
+  }
+  callApi = async() => {
+    const response = await fetch('/api/customer');
+    const body = await response.json();
+    return body;
+  }
+  progress = () => {
+    const { completed } = this.state;
+    this.setState({ completed: completed >= 100 ? 0 : completed + 1});
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -63,8 +65,8 @@ class App extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-          {
-            customer.map(c => {
+          { this.state.customer!=0 ? this.state.customer.map(c => 
+              {
               return(
                 <Customer
                     key = {c.id}
@@ -76,8 +78,14 @@ class App extends Component {
                     job = {c.job}
                 />
               );
-            })
-          }
+            }) : 
+            <TableRow>
+              <TableCell colspan="6" align="center">
+                <CircularProgress className={classes.progress} 
+                variant="determinate" value={this.state.completed}/>
+              </TableCell>
+            </TableRow>
+            }
           </TableBody>
         </Table>
       </Paper>
